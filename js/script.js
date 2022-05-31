@@ -24,3 +24,5 @@ const movieDB = {
     ]
 };
 
+console.log('hello');
+
