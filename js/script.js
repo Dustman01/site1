@@ -58,19 +58,49 @@ interactiveIist.innerHTML = '';
 
 
 // 
-function renderInteractiveIist(){
-
-    getPost('http://localhost:3000/movies')
+const element = document.createElement('ul');
+function deletCinema(){
+    console.log(element);
+    const elements = element.querySelectorAll('li');
+    elements.forEach((el, i) => {
+        el.addEventListener('click', e =>{
+            if(e.target.classList.contains('delete')){
+                //getPost(http://localhost:3000/movies);
+                console.log(i);
+                el.remove();
+              //  deletPost('http://localhost:3000/movies', i);
+            }
+        });
+    });
+    
+}
+function  renderInteractiveIist(){
+    interactiveIist.innerHTML ='';
+    element.innerHTML ='';
+    element.classList.add('promo__interactive-list');
+     getPost('http://localhost:3000/movies')
         .then(post => {
-            post.sort();
-            post.forEach((el,i) =>{
-                interactiveIist.innerHTML += `
+            let arr = [];
+            Object.entries(post).forEach((val, key) =>{
+                arr.push(val[1].name);
+            });
+            arr.sort();
+            arr.forEach((el,i) =>{
+                element.innerHTML += `
                     <li class="promo__interactive-item">${i+1}. ${el}
                         <div class="delete"></div>
                     </li>
                 `;
             });
+            interactiveIist.append(element);
+            
+
+            deletCinema();
+            
+            
+            //return element;
         });
+        
 
 }
 
@@ -97,10 +127,54 @@ async function getPost(url){
     return await post.json();
 }
 
+const formCinema = document.querySelectorAll('.add');
+const addingInput = document.querySelector('.adding__input');
+ 
+function addCinema(formCinema){
+    let cinema = {};
+    let el;
+    addingInput.addEventListener('input',e => {
+        el = addingInput.value;
+    });
+
+    formCinema.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        cinema.name = el;
+        console.log(JSON.stringify(cinema));
+        setPost('http://localhost:3000/movies', JSON.stringify(cinema))
+            .then(e => {
+                if(e.ok){
+                    renderInteractiveIist();
+                }
+            })
+            .catch(e => console.log('error'));
+        
+    });
+
+}
+
+formCinema.forEach(form =>{
+     addCinema(form);
+     });
 
 
+async function setPost(url, json){
+    const post = await fetch(url, {
+        method: 'POST',
+        headers:{
+            'Content-type': 'application/json'
+        },
+        body: json
+    });
 
+    return await post;
+}
 
-console.log('here');
-
-
+function deletPost(url, id){
+    fetch('http://localhost:3000/movies/' + id, {
+        method: 'DELETE'
+    })
+    .then(res => res.json()) // or res.json()
+    .then(res => console.log(res));
+}
+// 
